@@ -1,0 +1,44 @@
+version: '2.1'
+services:
+    web:
+      build: .
+      #command: python app.py
+      image: webapp
+      ports:
+       - "8000:5000"
+      networks:
+       db_net:
+        ipv4_address: 172.21.0.5
+      links:
+       - cassandra01
+       - cassandra11
+    cassandra01:
+        image: cassandra:2.2.0
+        container_name: cassandra01
+        ports:
+         - 9042:9042
+         - 7199:7199
+        networks:
+         db_net:
+          ipv4_address: 172.21.0.2
+    cassandra11:
+        image: cassandra:2.2.0
+        container_name: cassandra11
+        ports:
+         - 9142:9042
+        networks:
+         db_net:
+          ipv4_address: 172.21.0.3
+        links:
+         - cassandra01:seed
+        environment:
+         - CASSANDRA_SEEDS=seed
+
+networks:
+  db_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+       - subnet: 172.21.0.0/24
+
